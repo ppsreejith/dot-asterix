@@ -1,5 +1,5 @@
 * About
-  A simple, customizable org publish demo
+  My blaag
 * Instructions
 ** Publishing
 *** Spacemacs
@@ -9,3 +9,12 @@
    If you're facing problems with publishing, do the following to do a clean publish.
    1. Run ~rm ./public/~ to clear the published directory.
    2. Run ~rm -rf ~/.emacs.d/.cache/.org-timestamps/~ to clear the org cache.
+** Running
+   When porting old posts, I used this script:
+   #+begin_src elisp
+     (defun create-old-post (date name)
+       (find-file (concat (projectile-project-root) "src/posts/" date (downcase (replace-regexp-in-string " +" "-" name)) ".org"))
+       (insert "#+INCLUDE: \"../../../../options/default-config.org\"\n")
+       (insert (format "#+SUBTITLE: %s\n\n" name))
+     )
+   #+end_src

@@ -1,7 +1,4 @@
-* Roadmap [3/6][50%]
-  - [X] Add support to publish entire project.
-  - [X] Templatize for other future web projects.
-  - [X] Update ~.dir-locals.el~ file to use relative paths
-  - [ ] Update project /includes/ to start from project root
-  - [ ] Add script to add a new post
-  - [ ] Add step to build project as part of CI
+* Roadmap [0/3][0%]
+  - [ ] Setup CI to deploy
+  - [ ] Fix dates
+  - [ ] Fix home page
