@@ -1,0 +1,31 @@
+#+INCLUDE: "./options/default-config.org"
+#+SUBTITLE: Default Subtitle
+
+* Testing
+** About
+  Hopefully this will be rendered well[fn:1] 
+  And [[file:posts/path/to/example-post.org][links]] work too.
+** Posts
+   How are these rendered?
+** Checklists? [2/3][66%]
+   - [ ] Hmm
+   - [X] Should try this
+   - [X] What about sublists? [2/2][100%]
+     - [X] Seems to work fine
+     - [X] Yep
+** What about Tables?                                              :question:
+  | Name | Place | Animal | Things |
+  |------+-------+--------+--------|
+  | Sura | India | Lion   | Roars  |
+*** TODO How about this?
+** Example Code                                                 :code:blocks:
+   #+begin_src ruby
+     puts "Hello World"
+   #+end_src
+
+   #+begin_src javascript
+     console.log("YOLO")
+   #+end_src
+** Footnotes
+
+[fn:1] Lol

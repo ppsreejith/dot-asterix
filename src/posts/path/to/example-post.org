@@ -1,0 +1,8 @@
+#+INCLUDE: "../../../options/default-config.org"
+#+SUBTITLE: An Example Link
+
+* Testing
+** About
+   Nothing much here.
+** Link here
+   This page exists only to serve a link

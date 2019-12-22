@@ -1,0 +1,11 @@
+* About
+  A simple, customizable org publish demo
+* Instructions
+** Publishing
+*** Spacemacs
+    1. Access a file, for example ~./src/index.org~.
+    2. Use ~, e e P p~ to publish the project. The output will be in the ~public~ folder.
+** Troubleshooting
+   If you're facing problems with publishing, do the following to do a clean publish.
+   1. Run ~rm ./public/~ to clear the published directory.
+   2. Run ~rm -rf ~/.emacs.d/.cache/.org-timestamps/~ to clear the org cache.
