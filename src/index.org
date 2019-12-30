@@ -1,2 +1,3 @@
-#+TITLE: Sitemap for project pages
-
+#+INCLUDE: "./options/default-config.org"
+#+INCLUDE: "./sitemap.org"
+#+SUBTITLE: Index

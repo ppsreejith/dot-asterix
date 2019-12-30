@@ -8,7 +8,9 @@
                                 :base-extension "org"
                                 :exclude ".*-config.org"
                                 :auto-sitemap t
-                                :sitemap-filename "index.org"
+                                :sitemap-filename "sitemap.org"
+                                :sitemap-title ""
+                                :sitemap-style 'list
                                 :publishing-function 'org-html-publish-to-html)
                           (list "styles"
                                 :base-directory (path "src/styles")
