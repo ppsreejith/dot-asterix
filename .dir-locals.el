@@ -7,6 +7,8 @@
                                 :recursive t
                                 :base-extension "org"
                                 :exclude ".*-config.org"
+                                :auto-sitemap t
+                                :sitemap-filename "index.org"
                                 :publishing-function 'org-html-publish-to-html)
                           (list "styles"
                                 :base-directory (path "src/styles")
@@ -20,5 +22,5 @@
                                 :recursive t
                                 :base-extension "js"
                                 :publishing-function 'org-publish-attachment)
-                          '("project" :components ("pages" "styles" "scripts"))))))
+                          '("blog" :components ("pages" "styles" "scripts"))))))
          )))
