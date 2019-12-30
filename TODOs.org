@@ -1,4 +1,4 @@
 * Roadmap [0/3][0%]
+  - [ ] Fix home page (Add sitemap instead?)
+  - [ ] Remove unnecessary dates on display
   - [ ] Setup CI to deploy
-  - [ ] Fix dates
-  - [ ] Fix home page
