@@ -18,3 +18,5 @@
        (insert (format "#+SUBTITLE: %s\n\n" name))
      )
    #+end_src
+** Hack
+   This involves some ugly hacks namely removing the ~file-name-absolute-p~ check from the ~when~ block in line 3088 in ~ox-html.org~ inside the ~org-html-link~ to get internal references working.

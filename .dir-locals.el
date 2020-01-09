@@ -1,4 +1,6 @@
 ((nil . ((eval . (cl-flet ((path (dir) (concat (projectile-project-root) dir)))
+                   (setq org-html-link-use-abs-url t)
+                   (setq org-html-link-home "/")
                    (setq org-publish-project-alist
                          (list
                           (list "pages"
