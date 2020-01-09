@@ -11,3 +11,4 @@
 - [[file:posts/2019/06/01/book-review:-the-tartar-steppe.org][book-review:-the-tartar-steppe]]
 - [[file:posts/2019/06/01/book-review:-who-we-are-and-how-we-got-here.org][book-review:-who-we-are-and-how-we-got-here]]
 - [[file:posts/2019/08/31/book-review:-chop-wood-carry-water.org][book-review:-chop-wood-carry-water]]
+- [[file:posts/2020/01/10/books.org][books]]
