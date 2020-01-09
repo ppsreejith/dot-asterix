@@ -1,0 +1,10 @@
+.todo.ON_TRACK {
+    background-color: yellow;
+    color: black;
+}
+.todo.NOT_STARTED {
+    background-color: black;
+}
+.timestamp {
+    color: black;
+}
