@@ -1,7 +1,6 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/styles/default.css"/>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="/styles/custom.css"/>
 #+OPTIONS: toc:nil
-#+OPTIONS: date:nil
 #+OPTIONS: html-style:nil
 #+OPTIONS: num:nil
 #+OPTIONS: H:4

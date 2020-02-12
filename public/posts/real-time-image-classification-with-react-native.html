@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-02-12 Wed 09:30 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dot Asterisk</title>
+<meta name="generator" content="Org mode" />
+<link rel="stylesheet" type="text/css" href="/styles/default.css"/>
+<link rel="stylesheet" type="text/css" href="/styles/custom.css"/>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href=""> UP </a>
+ |
+ <a accesskey="H" href="/"> HOME </a>
+</div><div id="content">
+<h1 class="title">Dot Asterisk
+<br />
+<span class="subtitle">Real-time Image classification with React Native</span>
+</h1>
+
+<div id="outline-container-org35feea8" class="outline-2">
+<h2 id="org35feea8">Background&#xa0;&#xa0;&#xa0;<span class="tag"><span class="react_native">react_native</span>&#xa0;<span class="tensorflow">tensorflow</span></span></h2>
+<div class="outline-text-2" id="text-org35feea8">
+<p>
+So I had some time to burn and with our success at the Hacko Hackathon, thought of taking some time to work on creating a standalone real-time image classification library with React Native. Below is pretty much copied over from my Medium post.
+</p>
+
+<p>
+Earlier attempts at Image classification over React Native involved sending image data to the model classifier by sending the image over the bridge or storing the image to disk and accessing the image on the native side. Here's an attempt at live image classification by processing from the camera feed on the native side and getting the output as a byte stream on the JS side using the react-native-camera-tflite library.
+</p>
+
+<p>
+Huge shout-out to the people over at <a href="https://github.com/react-native-community/react-native-camera">react-native-camera</a>. This is essentially just a fork of their awesome work.
+</p>
+
+<p>
+Note: This is currently developed only for Android but could be implemented for iOS. (See <a href="https://github.com/jigsawxyz/react-native-coreml-image">here</a> for a CoreML implementation on iOS).
+</p>
+
+<p>
+To start, let's create an empty react native project:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">react-native init mobilenetapp
+<span style="color: #4f97d7;">cd</span> mobilenet-app
+</pre>
+</div>
+
+<p>
+Let's add our dependencies:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">npm i react-native-camera-tflite
+react-native link react-native-camera-tflite
+</pre>
+</div>
+
+<p>
+Follow the install instructions (for android. Same as react-native-camera):
+</p>
+
+<ol class="org-ol">
+<li>Insert the following lines inside the dependencies block in android/build.gradle:</li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-javascript">...
+allprojects <span style="color: #4f97d7;">{</span>
+    repositories <span style="color: #bc6ec5;">{</span>
+        maven <span style="color: #2d9574;">{</span> url <span style="color: #2d9574;">"[https://jitpack.io](https://jitpack.io)"</span> <span style="color: #2d9574;">}</span>  
+        maven <span style="color: #2d9574;">{</span> url <span style="color: #2d9574;">"[https://maven.google.com](https://maven.google.com)"</span> <span style="color: #2d9574;">}</span>
+
+...
+...
+ext <span style="color: #2d9574;">{</span>
+    compileSdkVersion           = <span style="color: #a45bad;">26</span>
+    targetSdkVersion            = <span style="color: #a45bad;">26</span>
+    buildToolsVersion           = <span style="color: #2d9574;">"26.0.2"</span>
+    googlePlayServicesVersion   = <span style="color: #2d9574;">"12.0.1"</span>
+    supportLibVersion           = <span style="color: #2d9574;">"27.1.0"</span>
+<span style="color: #2d9574;">}</span>
+</pre>
+</div>
+
+<ol class="org-ol">
+<li><p>
+Insert the following lines inside android/app/build.gradle
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript">android <span style="color: #4f97d7;">{</span>
+    ...
+        aaptOptions <span style="color: #bc6ec5;">{</span>
+            noCompress <span style="color: #2d9574;">"tflite"</span>
+            noCompress <span style="color: #2d9574;">"lite"</span>
+        <span style="color: #bc6ec5;">}</span>
+    ...
+</pre>
+</div></li>
+</ol>
+
+
+<p>
+Now let's use the download our model file from <a href="http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224_quant.tgz">here</a>, decompress it, and copy over the mobilenet_v1_1.0_224_quant.tflite file over to our project.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">mkdir -p ./android/app/src/main/assets
+cp mobilenet_v1_1.0_224_quant.tflite ./android/app/src/main/assets
+</pre>
+</div>
+
+<p>
+Add [this](<a href="https://gist.github.com/ppsreejith/1016f74f3c0cc95c121668904da67900">https://gist.github.com/ppsreejith/1016f74f3c0cc95c121668904da67900</a>) file to your project root directory as Output.json
+</p>
+
+<p>
+Replace the content of App.js in your project root directory with the following:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript"><span style="color: #4f97d7; font-weight: bold;">import</span> React, <span style="color: #4f97d7;">{</span>Component<span style="color: #4f97d7;">}</span> from <span style="color: #2d9574;">'react'</span>;
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">{</span>StyleSheet, Text, View <span style="color: #4f97d7;">}</span> from <span style="color: #2d9574;">'react-native'</span>;
+<span style="color: #4f97d7; font-weight: bold;">import</span> <span style="color: #4f97d7;">{</span> RNCamera <span style="color: #4f97d7;">}</span> from <span style="color: #2d9574;">'react-native-camera-tflite'</span>;
+<span style="color: #4f97d7; font-weight: bold;">import</span> outputs from <span style="color: #2d9574;">'./Output.json'</span>;
+<span style="color: #4f97d7; font-weight: bold;">import</span> _ from <span style="color: #2d9574;">'lodash'</span>;
+
+<span style="color: #4f97d7; font-weight: bold;">let</span> <span style="color: #7590db;">_currentInstant</span> = <span style="color: #a45bad;">0</span>;
+
+<span style="color: #4f97d7; font-weight: bold;">export</span> <span style="color: #4f97d7; font-weight: bold;">default</span> <span style="color: #4f97d7; font-weight: bold;">class</span> App <span style="color: #4f97d7; font-weight: bold;">extends</span> Component <span style="color: #4f97d7;">{</span>
+    constructor<span style="color: #bc6ec5;">(</span>props<span style="color: #bc6ec5;">)</span> <span style="color: #bc6ec5;">{</span>
+        <span style="color: #4f97d7; font-weight: bold;">super</span><span style="color: #2d9574;">(</span>props<span style="color: #2d9574;">)</span>;
+        <span style="color: #a45bad;">this</span>.state = <span style="color: #2d9574;">{</span>
+            time: <span style="color: #a45bad;">0</span>,
+            output: <span style="color: #2d9574;">""</span>
+        <span style="color: #2d9574;">}</span>;
+    <span style="color: #bc6ec5;">}</span>
+
+    processOutput<span style="color: #bc6ec5;">(</span><span style="color: #2d9574;">{</span>data<span style="color: #2d9574;">}</span><span style="color: #bc6ec5;">)</span> <span style="color: #bc6ec5;">{</span>
+        <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">probs</span> = _.map<span style="color: #2d9574;">(</span>data, item =&gt; _.round<span style="color: #67b11d;">(</span>item/<span style="color: #a45bad;">255</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">0</span>.<span style="color: #a45bad;">02</span><span style="color: #67b11d;">)</span><span style="color: #2d9574;">)</span>;
+        <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">orderedData</span> = _.chain<span style="color: #2d9574;">(</span>data<span style="color: #2d9574;">)</span>.zip<span style="color: #2d9574;">(</span>outputs<span style="color: #2d9574;">)</span>.orderBy<span style="color: #2d9574;">(</span><span style="color: #a45bad;">0</span>, <span style="color: #2d9574;">'desc'</span><span style="color: #2d9574;">)</span>.map<span style="color: #2d9574;">(</span>item =&gt; <span style="color: #67b11d;">[</span>_.round<span style="color: #b1951d;">(</span>item<span style="color: #4f97d7;">[</span><span style="color: #a45bad;">0</span><span style="color: #4f97d7;">]</span>/<span style="color: #a45bad;">255</span>.<span style="color: #a45bad;">0</span>, <span style="color: #a45bad;">2</span><span style="color: #b1951d;">)</span>, item<span style="color: #b1951d;">[</span><span style="color: #a45bad;">1</span><span style="color: #b1951d;">]</span><span style="color: #67b11d;">]</span><span style="color: #2d9574;">)</span>.value<span style="color: #2d9574;">()</span>;
+        <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">outputData</span> = _.chain<span style="color: #2d9574;">(</span>orderedData<span style="color: #2d9574;">)</span>.take<span style="color: #2d9574;">(</span><span style="color: #a45bad;">3</span><span style="color: #2d9574;">)</span>.map<span style="color: #2d9574;">(</span>item =&gt; <span style="color: #2d9574;">`${item[1]}: ${item[0]}`</span><span style="color: #2d9574;">)</span>.join<span style="color: #2d9574;">(</span><span style="color: #2d9574;">'\n'</span><span style="color: #2d9574;">)</span>.value<span style="color: #2d9574;">()</span>;
+        <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">time</span> = Date.now<span style="color: #2d9574;">()</span> - <span style="color: #2d9574;">(</span>_currentInstant || Date.now<span style="color: #67b11d;">()</span><span style="color: #2d9574;">)</span>;
+        <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">output</span> = <span style="color: #2d9574;">`Guesses:\n${outputData}\nTime:${time} ms`</span>;
+        <span style="color: #a45bad;">this</span>.setState<span style="color: #2d9574;">(</span>state =&gt; <span style="color: #67b11d;">(</span><span style="color: #b1951d;">{</span>
+            output
+        <span style="color: #b1951d;">}</span><span style="color: #67b11d;">)</span><span style="color: #2d9574;">)</span>;
+        _currentInstant = Date.now<span style="color: #2d9574;">()</span>;
+    <span style="color: #bc6ec5;">}</span>
+
+    render<span style="color: #bc6ec5;">()</span> <span style="color: #bc6ec5;">{</span>
+        <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">modelParams</span> = <span style="color: #2d9574;">{</span>
+            file: <span style="color: #2d9574;">"mobilenet_v1_1.0_224_quant.tflite"</span>,
+            inputDimX: <span style="color: #a45bad;">224</span>,
+            inputDimY: <span style="color: #a45bad;">224</span>,
+            outputDim: <span style="color: #a45bad;">1001</span>,
+            freqms: <span style="color: #a45bad;">0</span>
+        <span style="color: #2d9574;">}</span>;
+        <span style="color: #4f97d7; font-weight: bold;">return</span> <span style="color: #2d9574;">(</span>
+                &lt;View style=<span style="color: #67b11d;">{</span>styles.container<span style="color: #67b11d;">}</span>&gt;
+                &lt;RNCamera
+            ref=<span style="color: #67b11d;">{</span>ref =&gt; <span style="color: #b1951d;">{</span>
+                <span style="color: #a45bad;">this</span>.camera = ref;
+            <span style="color: #b1951d;">}</span><span style="color: #67b11d;">}</span>
+            style = <span style="color: #67b11d;">{</span>styles.preview<span style="color: #67b11d;">}</span>
+            type=<span style="color: #67b11d;">{</span>RNCamera.Constants.Type.back<span style="color: #67b11d;">}</span>
+            flashMode=<span style="color: #67b11d;">{</span>RNCamera.Constants.FlashMode.on<span style="color: #67b11d;">}</span>
+            permissionDialogTitle=<span style="color: #67b11d;">{</span><span style="color: #2d9574;">'Permission to use camera'</span><span style="color: #67b11d;">}</span>
+            permissionDialogMessage=<span style="color: #67b11d;">{</span><span style="color: #2d9574;">'We need your permission to use your camera phone'</span><span style="color: #67b11d;">}</span>
+            onModelProcessed=<span style="color: #67b11d;">{</span>data =&gt; <span style="color: #a45bad;">this</span>.processOutput<span style="color: #b1951d;">(</span>data<span style="color: #b1951d;">)</span><span style="color: #67b11d;">}</span>
+            modelParams=<span style="color: #67b11d;">{</span>modelParams<span style="color: #67b11d;">}</span>
+                &gt;
+                &lt;Text style=<span style="color: #67b11d;">{</span>styles.cameraText<span style="color: #67b11d;">}</span>&gt;<span style="color: #67b11d;">{</span><span style="color: #a45bad;">this</span>.state.output<span style="color: #67b11d;">}</span>&lt;/Text&gt;
+                &lt;/RNCamera&gt;
+                &lt;/View&gt;
+        <span style="color: #2d9574;">)</span>;
+    <span style="color: #bc6ec5;">}</span>
+<span style="color: #4f97d7;">}</span>
+
+<span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">styles</span> = StyleSheet.create<span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">{</span>
+    container: <span style="color: #2d9574;">{</span>
+        flex: <span style="color: #a45bad;">1</span>,
+        flexDirection: <span style="color: #2d9574;">'column'</span>,
+        backgroundColor: <span style="color: #2d9574;">'black'</span>
+    <span style="color: #2d9574;">}</span>,
+    preview: <span style="color: #2d9574;">{</span>
+        flex: <span style="color: #a45bad;">1</span>,
+        justifyContent: <span style="color: #2d9574;">'center'</span>,
+        alignItems: <span style="color: #2d9574;">'center'</span>
+    <span style="color: #2d9574;">}</span>,
+    cameraText: <span style="color: #2d9574;">{</span>
+        color: <span style="color: #2d9574;">'white'</span>,
+        fontSize: <span style="color: #a45bad;">18</span>,
+        fontWeight: <span style="color: #2d9574;">'bold'</span>
+    <span style="color: #2d9574;">}</span>
+<span style="color: #bc6ec5;">}</span><span style="color: #4f97d7;">)</span>;
+
+</pre>
+</div>
+
+<p>
+We're done! Run your app with the following command.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">react-native run-android
+</pre>
+</div>
+
+
+<div class="figure">
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*9gvd0iTkVIlI4FvfGim6gg.gif" alt="1*9gvd0iTkVIlI4FvfGim6gg.gif" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Image Classification FTW!</p>
+</div>
+
+<p>
+To convert this to a hotdog not-hotdog app, just replace the processOutput function above with the following:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-javascript">processOutput<span style="color: #4f97d7;">(</span><span style="color: #bc6ec5;">{</span>data<span style="color: #bc6ec5;">}</span><span style="color: #4f97d7;">)</span> <span style="color: #4f97d7;">{</span>
+    <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">isHotDogProb</span> = data<span style="color: #bc6ec5;">[</span><span style="color: #a45bad;">935</span><span style="color: #bc6ec5;">]</span>;
+    <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">isHotDog</span> = isHotDogProb &gt; <span style="color: #a45bad;">0</span>.<span style="color: #a45bad;">2</span> ? <span style="color: #2d9574;">"HotDog"</span> : <span style="color: #2d9574;">"Not HotDog"</span>;
+    <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">time</span> = Date.now<span style="color: #bc6ec5;">()</span> - <span style="color: #bc6ec5;">(</span>_currentInstant || Date.now<span style="color: #2d9574;">()</span><span style="color: #bc6ec5;">)</span>;
+    <span style="color: #4f97d7; font-weight: bold;">const</span> <span style="color: #7590db;">output</span> = <span style="color: #2d9574;">`${isHotDog}\nTime:${time} ms`</span>;
+    <span style="color: #a45bad;">this</span>.setState<span style="color: #bc6ec5;">(</span>state =&gt; <span style="color: #2d9574;">(</span><span style="color: #67b11d;">{</span>
+        output
+    <span style="color: #67b11d;">}</span><span style="color: #2d9574;">)</span><span style="color: #bc6ec5;">)</span>;
+    _currentInstant = Date.now<span style="color: #bc6ec5;">()</span>;
+<span style="color: #4f97d7;">}</span>
+</pre>
+</div>
+
+<p>
+Run your app with the following command.
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">react-native run-android
+</pre>
+</div>
+
+
+<div class="figure">
+<p><img src="https://cdn-images-1.medium.com/max/2000/1*JUPsOWLBvBwQoP4jHwv__A.gif" alt="1*JUPsOWLBvBwQoP4jHwv__A.gif" />
+</p>
+<p><span class="figure-number">Figure 2: </span>It's a HotDog</p>
+</div>
+
+<p>
+Jian Yang would be proud :)
+</p>
+
+<p>
+This project has a lot of rough edges. I hope to clean up this up a lot more in the coming days. The rest of the features are the same as `react-native-camera`.
+</p>
+
+<p>
+Links: <a href="https://github.com/ppsreejith/react-native-camera-tflite">Github</a> <a href="https://github.com/ppsreejith/tflite-demo">Demo App</a>
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>
